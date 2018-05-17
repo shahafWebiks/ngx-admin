@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
-
-import { StateService } from '../../../@core/data/state.service';
+import {Component, OnInit} from '@angular/core';
+import {StateService} from '../../../@core/data/state.service';
+import {AppState} from '../../../store/state.model';
+import {NgRedux, select} from '@angular-redux/store';
+import {Observable} from 'rxjs/Rx';
 
 @Component({
   selector: 'ngx-theme-settings',
@@ -35,12 +37,17 @@ import { StateService } from '../../../@core/data/state.service';
     </div>
   `,
 })
-export class ThemeSettingsComponent {
+export class ThemeSettingsComponent implements OnInit {
 
   layouts = [];
   sidebars = [];
+  layouts$: Observable<any[]>;
+  @select('layoutsState') readonly layoutsArr: Observable<number>;
 
-  constructor(protected stateService: StateService) {
+  constructor(private ngRedux: NgRedux<AppState>,
+              protected stateService: StateService) {
+    // this.layoutsArr.subscribe(newList => console.log(newList));
+
     this.stateService.getLayoutStates()
       .subscribe((layouts: any[]) => this.layouts = layouts);
 
@@ -48,14 +55,70 @@ export class ThemeSettingsComponent {
       .subscribe((sidebars: any[]) => this.sidebars = sidebars);
   }
 
-  layoutSelect(layout: any): boolean {
-    this.layouts = this.layouts.map((l: any) => {
-      l.selected = false;
-      return l;
-    });
+  // ngOnInit() {
+  // this.ngRedux.select('layoutsState').subscribe(items => {
+  //   const temp = this.layouts.filter(item => item.selected);
+  //   this.stateService.setLayoutState(temp);
+  //   console.log(temp);
+  // });
+  // }
 
-    layout.selected = true;
-    this.stateService.setLayoutState(layout);
+  // ngOnInit() {
+  //   this.layouts$ = this.ngRedux.select('layoutsState');
+  //   this.layouts$.subscribe(items => {
+  //     this.stateService.setLayoutState(
+  //       items.filter(item => item.selected))
+  //   });
+  // }
+
+  ngOnInit() {
+    // const stateStorage = (localStorage.getItem('reduxState') ?
+    //   JSON.parse(localStorage.getItem('reduxState')).layoutsState.filter(item => item.selected)[0] : null
+    // );
+    this.layouts$ = this.ngRedux.select('layoutsState');
+    this.layouts$.subscribe(items => {
+      this.stateService.setLayoutState(items.filter(item => item.selected)[0]);
+      localStorage.setItem('reduxState', JSON.stringify(this.ngRedux.getState()));
+    })
+    // this.stateService.setLayoutState(stateStorage);
+  }
+
+
+  // this.stateService.setLayoutState(items.filter(item => {
+  //  item.selected
+
+  // this.layout = items.filter(item => item.selected);
+  // this.stateService.setLayoutState(this.layout);
+
+  // this.layouts$.subscribe(items => items.filter(item => item.selected));
+  //  this.ngRedux.select('layouts').subscribe(items => {
+  //
+  //   items.console.log("items:" + items);
+  //   // this.layouts = this.layouts.map((l: any) => {
+  //   //   l.selected = false;
+  //   //   return l;
+  //   // })
+  //   // this.layouts = items;
+  //   // items.map(item => {
+  //   //   console.log(item);
+  //   //   item['selected'] ? this.stateService.setLayoutState(item) : null;
+  //   // });
+  //   //
+  //   // .selected = true;
+  //   // this.stateService.setLayoutState(layout);
+  // });
+
+  layoutSelect(layout: any): boolean {
+    this.ngRedux.dispatch({
+      type: 'CHANGE_LAYOUT', payload: layout,
+    });
+    // this.layouts = this.layouts.map((l: any) => {
+    //   l.selected = false;
+    //   return l;
+    // });
+    //
+    // layout.selected = true;
+    // this.stateService.setLayoutState(layout);
     return false;
   }
 

@@ -1,7 +1,9 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { NbThemeService } from '@nebular/theme';
-import { NbJSThemeOptions } from '@nebular/theme/services/js-themes/theme.options';
-import { AnalyticsService } from '../../../@core/utils/analytics.service';
+import {Component, OnInit, Input} from '@angular/core';
+import {NbThemeService} from '@nebular/theme';
+import {NbJSThemeOptions} from '@nebular/theme/services/js-themes/theme.options';
+import {AnalyticsService} from '../../../@core/utils/analytics.service';
+import {AppState} from '../../../store/state.model';
+import {NgRedux} from '@angular-redux/store';
 
 @Component({
   selector: 'ngx-theme-switcher',
@@ -27,19 +29,31 @@ export class ThemeSwitcherComponent implements OnInit {
   @Input() vertical: boolean = false;
 
   constructor(
+    private ngRedux: NgRedux<AppState>,
     private themeService: NbThemeService,
     private analyticsService: AnalyticsService,
-  ) {}
+  ) {
+  }
 
   ngOnInit() {
+    // console.log(JSON.parse(localStorage.getItem('reduxState')).themeColor);
     this.themeService.getJsTheme()
       .subscribe((theme: NbJSThemeOptions) => this.theme = theme);
+    this.ngRedux.select('themeColor').subscribe(item => {
+        this.themeService.changeTheme(item.toString());
+      localStorage.setItem('reduxState', JSON.stringify(this.ngRedux.getState()));
+      // console.log(JSON.parse(localStorage.getItem('reduxState')).themeColor);
+
+    });
+    // this.themeService.changeTheme(stateStorage);
   }
 
   toggleTheme(theme: boolean) {
+    // console.log('changed');
     const themeName = this.boolToTheme(theme);
-    this.themeService.changeTheme(themeName);
-
+    this.ngRedux.dispatch({
+      type: 'CHANGE_THEME', payload: themeName,
+    });
     this.analyticsService.trackEvent('switchTheme');
   }
 

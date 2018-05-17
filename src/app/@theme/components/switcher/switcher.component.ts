@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import {Component, Input, Output, EventEmitter} from '@angular/core';
 
 @Component({
   selector: 'ngx-switcher',
@@ -25,6 +25,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
   `,
 })
 export class SwitcherComponent {
+
   @Input() firstValue: any;
   @Input() secondValue: any;
 
