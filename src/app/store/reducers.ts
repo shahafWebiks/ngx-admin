@@ -1,4 +1,4 @@
-import {AppState, INITIAL_STATE} from './state.model';
+import {AppState} from './state.model';
 import {Action} from './actions';
 import {tassign} from 'tassign';
 

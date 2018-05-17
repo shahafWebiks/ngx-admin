@@ -1,6 +1,6 @@
 import {NgModule} from '@angular/core';
 import {NgRedux, NgReduxModule} from '@angular-redux/store';
-import {AppState, INITIAL_STATE} from './state.model';
+import {AppState} from './state.model';
 import {rootReducer} from './reducers';
 
 const persistedState = localStorage.getItem('reduxState') ? JSON.parse(localStorage.getItem('reduxState')) : {};
